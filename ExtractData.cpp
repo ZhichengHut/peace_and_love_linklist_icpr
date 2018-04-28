@@ -329,52 +329,49 @@ void saveTrainData(string img_file, string out_fold, float thresh, int width, in
 }
 
 void getTrainingSet(string train_fold, string out_fold, float thresh, int width, int R, int rand_num){
-	vector<string> tif_set, csv_set;
+	vector<string> bmp_set, csv_set;
 	clearFold(out_fold);
 
 	char delim = '/';
 
     char curDir[100];
-    
-    for(int c=1; c<=9; c++){
-		//sprintf(curDir, "%s%c%i%c", dataPath.c_str(), delim, c, delim);
-		sprintf(curDir, "%s%02i", train_fold.c_str(), c);
-		//cout << curDir << endl;
-
-		DIR* pDIR;
-		struct dirent *entry;
-		struct stat s;
-
-		stat(curDir,&s);
-
-		// if path is a directory
-		if ( (s.st_mode & S_IFMT ) == S_IFDIR ){
-			if(pDIR=opendir(curDir)){
-				//for all entries in directory
-				while(entry = readdir(pDIR)){
-					stat((curDir + string("/") + string(entry->d_name)).c_str(),&s);
-					if (((s.st_mode & S_IFMT ) != S_IFDIR ) && ((s.st_mode & S_IFMT) == S_IFREG )){
-						//cout << string(entry->d_name) << endl;
-						if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "csv")
-							csv_set.push_back(curDir + string("/") + string(entry->d_name));
-						else
-							tif_set.push_back(curDir + string("/") + string(entry->d_name));
-					}
+	
+	sprintf(curDir, "%s", train_fold.c_str());
+	//cout << curDir << endl;
+	
+	DIR* pDIR;
+	struct dirent *entry;
+	struct stat s;
+	
+	stat(curDir,&s);
+	
+	// if path is a directory
+	if ( (s.st_mode & S_IFMT ) == S_IFDIR ){
+		if(pDIR=opendir(curDir)){
+			//for all entries in directory
+			while(entry = readdir(pDIR)){
+				stat((curDir + string("/") + string(entry->d_name)).c_str(),&s);
+				if (((s.st_mode & S_IFMT ) != S_IFDIR ) && ((s.st_mode & S_IFMT) == S_IFREG )){
+					//cout << string(entry->d_name) << endl;
+					if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "csv")
+						csv_set.push_back(curDir + string("/") + string(entry->d_name));
+					else
+						bmp_set.push_back(curDir + string("/") + string(entry->d_name));
 				}
 			}
 		}
 	}
 
 	int j = 0;
-	for(int i=0; i<tif_set.size(); i++){
-		if(j<csv_set.size() && tif_set[i].substr(train_fold.length(),5) == csv_set[j].substr(train_fold.length(),5)){
-			cout << tif_set[i] << endl;
+	for(int i=0; i<bmp_set.size(); i++){
+		if(j<csv_set.size() && bmp_set[i].substr(train_fold.length(),5) == csv_set[j].substr(train_fold.length(),5)){
+			cout << bmp_set[i] << endl;
 			//cout << csv_set[j] << endl;
-			saveTrainData(tif_set[i], csv_set[j++], out_fold, thresh, width, R, rand_num);
+			saveTrainData(bmp_set[i], csv_set[j++], out_fold, thresh, width, R, rand_num);
 		}
 		else{
-			cout << tif_set[i] << endl;
-			saveTrainData(tif_set[i], out_fold, thresh, width, R, rand_num);
+			cout << bmp_set[i] << endl;
+			saveTrainData(bmp_set[i], out_fold, thresh, width, R, rand_num);
 		}
 	}
 }
@@ -515,58 +512,55 @@ void saveTrainData(string img_file, string out_fold, float thresh, int width, in
 }
 
 void getTrainingSet(string train_fold, string out_fold, float thresh, int width, int R){
-	vector<string> tif_set, csv_set;
+	vector<string> bmp_set, csv_set;
 	clearFold(out_fold);
 
 	char delim = '/';
 
     char curDir[100];
-    
-    for(int c=1; c<=9; c++){
-		//sprintf(curDir, "%s%c%i%c", dataPath.c_str(), delim, c, delim);
-		sprintf(curDir, "%s%02i", train_fold.c_str(), c);
-		//cout << curDir << endl;
-
-		DIR* pDIR;
-		struct dirent *entry;
-		struct stat s;
-
-		stat(curDir,&s);
-
-		// if path is a directory
-		if ( (s.st_mode & S_IFMT ) == S_IFDIR ){
-			if(pDIR=opendir(curDir)){
-				//for all entries in directory
-				while(entry = readdir(pDIR)){
-					stat((curDir + string("/") + string(entry->d_name)).c_str(),&s);
-					if (((s.st_mode & S_IFMT ) != S_IFDIR ) && ((s.st_mode & S_IFMT) == S_IFREG )){
-						//cout << string(entry->d_name) << endl;
-						if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "csv")
-							csv_set.push_back(curDir + string("/") + string(entry->d_name));
-						else
-							tif_set.push_back(curDir + string("/") + string(entry->d_name));
-					}
+	
+	sprintf(curDir, "%s", train_fold.c_str());
+	//cout << curDir << endl;
+	
+	DIR* pDIR;
+	struct dirent *entry;
+	struct stat s;
+	
+	stat(curDir,&s);
+	
+	// if path is a directory
+	if ( (s.st_mode & S_IFMT ) == S_IFDIR ){
+		if(pDIR=opendir(curDir)){
+			//for all entries in directory
+			while(entry = readdir(pDIR)){
+				stat((curDir + string("/") + string(entry->d_name)).c_str(),&s);
+				if (((s.st_mode & S_IFMT ) != S_IFDIR ) && ((s.st_mode & S_IFMT) == S_IFREG )){
+					//cout << string(entry->d_name) << endl;
+					if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "csv")
+						csv_set.push_back(curDir + string("/") + string(entry->d_name));
+					else
+						bmp_set.push_back(curDir + string("/") + string(entry->d_name));
 				}
 			}
 		}
 	}
 
 	int j = 0;
-	for(int i=0; i<tif_set.size(); i++){
-		if(j<csv_set.size() && tif_set[i].substr(train_fold.length(),5) == csv_set[j].substr(train_fold.length(),5)){
-			cout << tif_set[i] << endl;
+	for(int i=0; i<bmp_set.size(); i++){
+		if(j<csv_set.size() && bmp_set[i].substr(train_fold.length(),5) == csv_set[j].substr(train_fold.length(),5)){
+			cout << bmp_set[i] << endl;
 			//cout << csv_set[j] << endl;
-			saveTrainData(tif_set[i], csv_set[j++], out_fold, thresh, width, R);
+			saveTrainData(bmp_set[i], csv_set[j++], out_fold, thresh, width, R);
 		}
 		else{
-			cout << tif_set[i] << endl;
-			saveTrainData(tif_set[i], out_fold, thresh, width, R);
+			cout << bmp_set[i] << endl;
+			saveTrainData(bmp_set[i], out_fold, thresh, width, R);
 		}
 	}
 }
 
 void getTestImg(string curDir, string img_name, float thresh, int width, int R){
-	string out_fold = curDir + "/" + img_name.substr(0,2) + "/";
+	string out_fold = curDir + "/" + img_name.substr(0,6) + "/";
 	string img_file = curDir + "/" + img_name;
 
 	clearFold(out_fold);
@@ -599,33 +593,29 @@ void getTestImg(string curDir, string img_name, float thresh, int width, int R){
 }
 
 void getTestingSet(string test_fold, float thresh, int width, int R){
-	vector<string> tif_set, csv_set;
-
 	char delim = '/';
 
     char curDir[100];
-    
-    for(int c=10; c<=12; c++){
-		list<Mat> imgList;
-		sprintf(curDir, "%s%02i", test_fold.c_str(), c);
-		cout << curDir << endl;
-
-		DIR* pDIR;
-		struct dirent *entry;
-		struct stat s;
-
-		stat(curDir,&s);
-
-		// if path is a directory
-		if ( (s.st_mode & S_IFMT ) == S_IFDIR ){
-			if(pDIR=opendir(curDir)){
-				//for all entries in directory
-				while(entry = readdir(pDIR)){
-					stat((curDir + string("/") + string(entry->d_name)).c_str(),&s);
-					if (((s.st_mode & S_IFMT ) != S_IFDIR ) && ((s.st_mode & S_IFMT) == S_IFREG )){
-						if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "tif")
-							getTestImg(curDir, entry->d_name, thresh, width, R);
-					}
+	
+	list<Mat> imgList;
+	sprintf(curDir, "%s", test_fold.c_str());
+	cout << curDir << endl;
+	
+	DIR* pDIR;
+	struct dirent *entry;
+	struct stat s;
+	
+	stat(curDir,&s);
+	
+	// if path is a directory
+	if ( (s.st_mode & S_IFMT ) == S_IFDIR ){
+		if(pDIR=opendir(curDir)){
+			//for all entries in directory
+			while(entry = readdir(pDIR)){
+				stat((curDir + string("/") + string(entry->d_name)).c_str(),&s);
+				if (((s.st_mode & S_IFMT ) != S_IFDIR ) && ((s.st_mode & S_IFMT) == S_IFREG )){
+					if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "bmp")
+						getTestImg(curDir, entry->d_name, thresh, width, R);
 				}
 			}
 		}
@@ -643,13 +633,5 @@ void extractData(string train_fold, string test_fold, string out_fold, float tra
 	if(get_test){
 		getTestingSet(test_fold, test_thresh, width, R);
 		cout << "Extracted testing set completed" << endl;
-	}
-};
-
-void extractData(string train_fold, string out_fold, float train_thresh, bool get_train, int width, int R){
-	if(get_train){
-		getTrainingSet(train_fold, out_fold, train_thresh, width, R);
-			cout << "Extracted training set completed" << endl;
-			cout << "total cell: " << total_c << ", total miss: " << total_miss << ", total mitosis: " << total_mitosis << endl;
 	}
 };

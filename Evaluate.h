@@ -17,7 +17,6 @@ void get_predict_result(RandomForest *RF, string test_fold, int width, int sampl
 void get_predict_result(RandomForest *RF, string test_fold, int width);
 
 float get_F1_score(string test_fold);
-float get_F1_score(string test_fold, bool second_filter);
 
 bool TLBO_test(Mat &img, Mat &mask, float threshold);
 
