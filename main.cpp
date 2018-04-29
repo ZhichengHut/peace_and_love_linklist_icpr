@@ -16,7 +16,7 @@ int main(){
 	string model_address = "E:/45 Thesis/result_icpr/model.txt";
 	string mask_address = "E:/45 Thesis/result_icpr/mask.txt";
 
-	bool load_mask_flag;
+	bool generate_mask_flag;
 	Mat mask_result = Mat::zeros(1,256,CV_32FC1);
 	float mask_threshold = 0;
 
@@ -37,10 +37,6 @@ int main(){
 			return 1;
 		}
 
-		RandomForest *RF = new RandomForest();
-		RF->load(fin_model);
-		fin_model.close();
-
 		cout << "*****************Start to load the mask*****************" << endl;
 		fin_mask >> mask_threshold;
 		for(int k=0; k<256; k++)
@@ -49,6 +45,9 @@ int main(){
 		fin_mask.close();
 		cout << "*****************Loading completed*****************" << endl << endl;
 
+		RandomForest *RF = new RandomForest();
+		RF->load(fin_model);
+		fin_model.close();
 
 		cout << "*****************Start to evaluate the performance*****************" << endl;
 		double start,end;
@@ -84,7 +83,7 @@ int main(){
 
 	if(!load_model_flag){
 		cout << "*****************Start to extract sub-image*****************" << endl;
-		float train_thresh = 0.15;
+		float train_thresh = 0.25;
 		float test_thresh = 0.15;
 
 		bool get_train = false;
@@ -92,7 +91,7 @@ int main(){
 
 		int patch_width = 35;
 		int core_R = 4;
-		int ran_point = 0;
+		int ran_point = 20;
 
 		extractData(train_fold, test_fold, out_fold, train_thresh, test_thresh, get_train, get_test, patch_width, core_R, ran_point);
 		cout << "*****************Extraction completed*****************" << endl << endl;
@@ -111,10 +110,10 @@ int main(){
 		cout << "*****************Reading completed*****************" << endl << endl;
 
 		cout << "Do you want to generate a mask? (0/1)" << endl;
-		//cin >> load_mask_flag;
-		load_mask_flag = true;
+		//cin >> generate_mask_flag;
+		generate_mask_flag = false;
 
-		if(load_mask_flag){
+		if(generate_mask_flag){
 			cout << "*****************Start to generate mask*****************" << endl;
 			int pop_num = 50;
 			int iteration_num = 200;
@@ -137,15 +136,15 @@ int main(){
 
 		double start,end;
 
-		for(float i=1; i<=1; i++){
-			int window_width = i;
+		for(int i=1; i<=20; i+=2){
+			int window_width = 10;
 
 			//int tree_num = 3;
 			int tree_num = 30;
 			int sample_num = 10000;
 			int maxDepth = 50;
-			int minLeafSample = 60;
-			//int minLeafSample = 1;
+			//int minLeafSample = 10;
+			int minLeafSample = i;
 			float minInfo = 0;
 
 			cout << "*****************Start to train the model*****************" << endl;
@@ -159,20 +158,21 @@ int main(){
 			cout << "Do you want to save the model? (0/1)" << endl;
 			bool save_flag;
 			//cin >> save_flag;
-			save_flag = true;
+			save_flag = false;
 			if(save_flag){
 				ofstream fout_model(model_address);
 				RF->save(fout_model);
 				fout_model.close();
 			}
 
+
 			cout << "*****************Start to evaluate the performance*****************" << endl;
 			start=clock();
 			//get_predict_result(RF, test_fold);
-			//int sample_interval = 5;
-			//float prob_threshold = 0.4;
-			//get_predict_result(RF, test_fold, patch_width, sample_interval, prob_threshold);
-			get_predict_result(RF, test_fold, mask_result, mask_threshold);
+			int sample_interval = 8;
+			float prob_threshold = 0.5;
+			get_predict_result(RF, test_fold, patch_width, sample_interval, prob_threshold);
+			//get_predict_result(RF, test_fold, mask_result, mask_threshold);
 			end=clock();
 			double test_t = (end - start) / CLOCKS_PER_SEC ;
 			cout << "*****************Evaluation completed*****************" << endl << endl;

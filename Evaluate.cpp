@@ -5,8 +5,7 @@ void get_predict_result(RandomForest *RF, string test_fold, Mat &mask, float thr
     char curDir[100];
 	
 	sprintf(curDir, "%s", test_fold.c_str());
-	cout << curDir << endl;
-	
+
 	DIR* pDIR;
 	struct dirent *entry;
 	struct stat s;
@@ -18,12 +17,14 @@ void get_predict_result(RandomForest *RF, string test_fold, Mat &mask, float thr
 		if(pDIR=opendir(curDir)){
 			//for all entries in directory
 			while(entry = readdir(pDIR)){
+				//cout << entry->d_name << endl;
 				stat((curDir + string("/") + string(entry->d_name)).c_str(),&s);
 				if (((s.st_mode & S_IFMT ) != S_IFDIR ) && ((s.st_mode & S_IFMT) == S_IFREG )){
 					if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "bmp"){
 						//find the corresponding fold according to the image name
-						string sub_curDIR = string(curDir) + "/" + string(entry->d_name).substr(0,2);
-						
+						string sub_curDIR = string(curDir) + "/" + string(entry->d_name).substr(0,6);
+						cout << sub_curDIR << endl;
+
 						vector<Mat> imgTest;
 						vector<int> X,Y;
 						
@@ -59,7 +60,7 @@ void get_predict_result(RandomForest *RF, string test_fold, Mat &mask, float thr
 						imgTest.clear();
 						vector<Mat>().swap(imgTest);
 						
-						string csv_name = string(curDir) + "/" + string(entry->d_name).substr(0,2) + "_predict.csv";
+						string csv_name = string(curDir) + "/" + string(entry->d_name).substr(0,6) + "_predict.csv";
 						ofstream fout(csv_name);
 						for(int i=0; i<result.size(); i++){
 							if(result[i] >= 0.6)
@@ -127,13 +128,13 @@ void get_predict_result(RandomForest *RF, string test_fold, int width, int sampl
 								heat_map_tmp.at<float>(i,j) = result[j*m+i];
 							}
 						}
-						
+
 						//imshow("heat_map_orginal", heat_map_tmp);
 						
 						Mat heat_map_tmp2 = Mat::zeros(imgTest.cols-2*width,imgTest.rows-2*width,CV_32FC1);
 						resize(heat_map_tmp,heat_map_tmp2,Size(imgTest.cols-2*width,imgTest.rows-2*width),0,0,INTER_LINEAR);
 						
-						Mat heat_map = Mat::zeros(2000,2000,CV_32FC1);
+						Mat heat_map = Mat::zeros(imgTest.cols,imgTest.rows,CV_32FC1);
 						heat_map_tmp2.copyTo(heat_map(Rect(width,width,heat_map_tmp2.cols,heat_map_tmp2.rows)));
 
 						threshold(heat_map, heat_map, prob_threshold,255 ,THRESH_BINARY);
@@ -155,7 +156,7 @@ void get_predict_result(RandomForest *RF, string test_fold, int width, int sampl
 						int cell_num = center.size();
 						cout << "mitosis number: " << cell_num << endl;
 
-						string csv_name = string(curDir) + "/" + string(entry->d_name).substr(0,2) + "_predict.csv";
+						string csv_name = string(curDir) + "/" + string(entry->d_name).substr(0,6) + "_predict.csv";
 						ofstream fout(csv_name);
 						for(int i=0; i< cell_num; i++)							
 							fout << center[i].y << "," <<  center[i].x << endl;
@@ -171,72 +172,6 @@ void get_predict_result(RandomForest *RF, string test_fold, int width, int sampl
 		}
 	}
 }
-
-void get_predict_result(RandomForest *RF, string test_fold, int width){
-	char curDir[100];
-
-	sprintf(curDir, "%s", test_fold.c_str());
-	cout << curDir << endl;
-
-	DIR* pDIR;
-	struct dirent *entry;
-	struct stat s;
-
-	stat(curDir,&s);
-
-	// if path is a directory
-	if ( (s.st_mode & S_IFMT ) == S_IFDIR ){
-		if(pDIR=opendir(curDir)){
-			//for all entries in directory
-			while(entry = readdir(pDIR)){
-				stat((curDir + string("/") + string(entry->d_name)).c_str(),&s);
-				if (((s.st_mode & S_IFMT ) != S_IFDIR ) && ((s.st_mode & S_IFMT) == S_IFREG )){
-					if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "bmp"){
-						//find the corresponding fold according to the image name
-						string cur_img = string(curDir) + "/" + string(entry->d_name);
-						cout << "current img: " << cur_img << endl;
-						
-						Mat imgTest = imread(cur_img,0);
-
-						string csv_name= string(curDir) + "/" + string(entry->d_name).substr(0,2) + "_predict.csv";
-						vector<int> prediction;
-						ifstream fin(csv_name);
-						if(fin){
-							cout << csv_name << endl;
-							prediction = readCSV(csv_name);
-						}
-						fin.close();
-
-						string csv_name_second = string(curDir) + "/" + string(entry->d_name).substr(0,2) + "_predict_second.csv";
-						ofstream fout(csv_name_second);
-
-						for(int i=0; i<prediction.size(); i+=2){
-							int y = prediction[i];
-							int x = prediction[i+1];
-
-							if(x < width + 1)
-								x = width + 1;
-							else if(x > imgTest.cols - width)
-								x = imgTest.cols - width;
-								
-							if(y < width + 1)
-								y = width + 1;
-							else if(y > imgTest.rows - width)
-								y = imgTest.rows - width;
-
-							Mat imgTest_integral;
-							integral(imgTest(Rect(x-width,y-width,2*width,2*width)),imgTest_integral);
-
-							if(RF->predict(imgTest_integral)>0.5)
-								fout << y << "," << x << endl;
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
 
 float get_F1_score(string test_fold){
 	int TP = 0;
@@ -266,7 +201,7 @@ float get_F1_score(string test_fold){
 						vector<int> ground_truth;
 						vector<int> prediction;
 
-						string csv_name = string(curDir) + "/" + string(entry->d_name).substr(0,2) + ".csv";
+						string csv_name = string(curDir) + "/" + string(entry->d_name).substr(0,6) + ".csv";
 						ifstream fin1(csv_name);
 						if(fin1){
 							//cout << csv_name << endl;
@@ -274,7 +209,7 @@ float get_F1_score(string test_fold){
 						}
 						fin1.close();
 
-						csv_name = string(curDir) + "/" + string(entry->d_name).substr(0,2) + "_predict.csv";
+						csv_name = string(curDir) + "/" + string(entry->d_name).substr(0,6) + "_predict.csv";
 						ifstream fin2(csv_name);
 						if(fin2){
 							//cout << csv_name << endl;

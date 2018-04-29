@@ -268,7 +268,7 @@ void saveTrainData(string img_file, string csv_file, string out_fold, float thre
 				index ++;
 
 				//rotate 90 degree
-				flip(img_t, img_t, 1);
+				/*flip(img_t, img_t, 1);
 				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
 				imwrite(img_name, img_t);
 				index ++;
@@ -285,7 +285,7 @@ void saveTrainData(string img_file, string csv_file, string out_fold, float thre
 				flip(img_t, img_t, 0);
 				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
 				imwrite(img_name, img_t);
-				index ++;
+				index ++;*/
 			}
 		}
 	}
@@ -304,8 +304,6 @@ void saveTrainData(string img_file, string out_fold, float thresh, int width, in
 		//cout << x << " " << y << endl; 
 		center.push_back(Point2i(x,y));
 	}
-
-	//int width = 30;
 
 	for(int i=0; i< center.size(); i++){
 		int x = center[i].x;
@@ -372,189 +370,6 @@ void getTrainingSet(string train_fold, string out_fold, float thresh, int width,
 		else{
 			cout << bmp_set[i] << endl;
 			saveTrainData(bmp_set[i], out_fold, thresh, width, R, rand_num);
-		}
-	}
-}
-
-//for the second filter
-void saveTrainData(string img_file, string csv_file, string out_fold, float thresh, int width, int R){
-	Mat img = imread(img_file,1);
-	Mat blue_ratio = preProcess(img, thresh);
-
-	//int R = 10;
-	vector<Point2i> center = getCenter(blue_ratio, R);
-	int cell_num = center.size();
-
-	vector<int> csvData = readCSV(csv_file);
-	int mitosis_num = csvData.size()/2;
-
-	//int width = 30;
-
-	int candidate_count = 0; 
-
-	for(int i=0; i<center.size(); i++){
-		int x = center[i].x;
-		int y = center[i].y;
-
-		//whether the position is out of bound
-		if(x < width + 1)
-			x = width + 1;
-		else if(x > img.cols - width)
-			x = img.cols - width;
-
-		if(y < width + 1)
-            y = width + 1;
-        else if(y > img.rows - width)
-            y = img.rows - width;
-
-		bool label = false;
-		for(int j=0; j<mitosis_num; j++){
-			//if(((x-width)<csvData[2*j+1]) && ((x+width)>csvData[2*j+1]) && ((y-width)<csvData[2*j]) && ((y+width)>csvData[2*j])){
-			if(sqrt(pow(x-csvData[2*j+1],2.0)+pow(y-csvData[2*j],2.0))<30){
-				label = true;
-				candidate_count++;
-				break;
-			}
-		}
-
-		if(label)
-			continue;
-		else{
-			char img_name[100];
-			sprintf(img_name, "%s%04i_0.png", out_fold.c_str(), index);
-			imwrite(img_name, img(Rect(x-width,y-width,2*width,2*width)));
-			index ++;
-		}
-	}
-
-	cout << "cell: " << cell_num << " candidate: " << candidate_count << ", mitosis_num: " << mitosis_num << endl;
-	total_c += cell_num;
-	total_miss += max(0, mitosis_num-candidate_count);
-	total_mitosis += mitosis_num;
-
-	for(int i=0; i<mitosis_num; i++){
-		bool x_label = true;
-		bool y_label = true;
-		for(int p=0; p<3; p++){
-		//for(int p=0; p<1; p++){
-			int x = csvData[2*i+1]+5*(p-1);
-			//int x = csvData[2*i+1];
-			if(x < width + 1 && x_label){
-				x = width + 1;
-				x_label = false;
-			}
-			else if(x < width + 1 && !x_label)
-				continue;
-
-			if(x > img.cols - width && x_label){
-				x = img.cols - width;
-				x_label = false;
-			}
-			else if(x > img.cols - width && !x_label)
-				continue;
-
-			for(int q=0; q<3; q++){
-			//for(int q=0; q<1; q++){
-				//int y = csvData[2*i]+5*(q-1);
-				int y = csvData[2*i];
-				if(y < width + 1 && y_label){
-					y = width + 1;
-					y_label = false;
-				}
-				else if(y < width + 1 && !y_label)
-					continue;
-				
-				if(y > img.rows - width && y_label){
-					y = img.rows - width;
-					y_label = false;
-				}
-				else if(y > img.rows - width && !y_label)
-					continue;
-				
-				char img_name[100];
-				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
-				imwrite(img_name, img(Rect(x-width,y-width,2*width,2*width)));
-				index ++;
-			}
-		}
-	}
-}
-
-void saveTrainData(string img_file, string out_fold, float thresh, int width, int R){
-	Mat img = imread(img_file,1);
-	Mat blue_ratio = preProcess(img, thresh);
-
-	//int R = 10;
-	vector<Point2i> center = getCenter(blue_ratio, R);
-	int cell_num = center.size();
-
-	//int width = 30;
-
-	for(int i=0; i< center.size(); i++){
-		int x = center[i].x;
-		int y = center[i].y;
-
-		if(x < width + 1)
-			x = width + 1;
-		else if(x > img.cols - width)
-			x = img.cols - width;
-
-		if(y < width + 1)
-            y = width + 1;
-        else if(y > img.rows - width)
-            y = img.rows - width;
-		
-		char img_name[100];
-		sprintf(img_name, "%s%04i_0.png", out_fold.c_str(), index);
-		imwrite(img_name, img(Rect(x-width,y-width,2*width,2*width)));
-		index ++;
-	}
-}
-
-void getTrainingSet(string train_fold, string out_fold, float thresh, int width, int R){
-	vector<string> bmp_set, csv_set;
-	clearFold(out_fold);
-
-	char delim = '/';
-
-    char curDir[100];
-	
-	sprintf(curDir, "%s", train_fold.c_str());
-	//cout << curDir << endl;
-	
-	DIR* pDIR;
-	struct dirent *entry;
-	struct stat s;
-	
-	stat(curDir,&s);
-	
-	// if path is a directory
-	if ( (s.st_mode & S_IFMT ) == S_IFDIR ){
-		if(pDIR=opendir(curDir)){
-			//for all entries in directory
-			while(entry = readdir(pDIR)){
-				stat((curDir + string("/") + string(entry->d_name)).c_str(),&s);
-				if (((s.st_mode & S_IFMT ) != S_IFDIR ) && ((s.st_mode & S_IFMT) == S_IFREG )){
-					//cout << string(entry->d_name) << endl;
-					if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "csv")
-						csv_set.push_back(curDir + string("/") + string(entry->d_name));
-					else
-						bmp_set.push_back(curDir + string("/") + string(entry->d_name));
-				}
-			}
-		}
-	}
-
-	int j = 0;
-	for(int i=0; i<bmp_set.size(); i++){
-		if(j<csv_set.size() && bmp_set[i].substr(train_fold.length(),5) == csv_set[j].substr(train_fold.length(),5)){
-			cout << bmp_set[i] << endl;
-			//cout << csv_set[j] << endl;
-			saveTrainData(bmp_set[i], csv_set[j++], out_fold, thresh, width, R);
-		}
-		else{
-			cout << bmp_set[i] << endl;
-			saveTrainData(bmp_set[i], out_fold, thresh, width, R);
 		}
 	}
 }
