@@ -71,7 +71,7 @@ void RandomForest::save(ofstream &fout){
 	cout << "*****************Start to save the model*****************" << endl;
 	fout << tree_num << " " << sample_num << " " << maxDepth << " " << minLeafSample << " " << minInfoGain << endl;
 	for(int i=0; i<tree_num; i++){
-		fout << "newtree" << endl;
+		fout << "newtree" << i << endl;
 		root_list[i]->save(fout);
 	}
 	cout << "*****************Saving completed*****************" << endl << endl;
@@ -84,7 +84,7 @@ void RandomForest::load(ifstream &fin){
 	//cout << "tree_num:" << tree_num << " sample_num:" << sample_num << " maxDepth:" << maxDepth << " minLeafSample:" << minLeafSample << " minInfoGain:" << minInfoGain << endl;
 	//cin.get();
 	for(int i=0; i<tree_num; i++){
-		cout << "New tree" << endl;
+		cout << "New tree： " << i << endl;
 		string title;
 		fin >> title;
 		cout << title << endl;

@@ -255,37 +255,89 @@ void saveTrainData(string img_file, string csv_file, string out_fold, float thre
 				else if(y > img.rows - width && !y_label)
 					continue;
 				
+				int scale = (int)(width*0.1);
+				
+				Mat img_o;
+				img(Rect(x-width,y-width,2*width,2*width)).copyTo(img_o);
+				Mat img_l;
+				resize(img_o, img_l, Size(2*(width+scale),2*(width+scale)), 0, 0, INTER_LINEAR);
+				img_l = img_l(Rect(scale,scale,2*width,2*width));
+				Mat img_s;
+				resize(img_o, img_s, Size(2*(width-scale),2*(width-scale)), 0, 0, INTER_LINEAR);
+				copyMakeBorder(img_s, img_s, scale,scale,scale,scale, BORDER_REPLICATE);
+
 				char img_name[100];
 				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
-				imwrite(img_name, img(Rect(x-width,y-width,2*width,2*width)));
+				imwrite(img_name, img_o);
+				index ++;
+				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
+				imwrite(img_name, img_l);
+				index ++;
+				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
+				imwrite(img_name, img_s);
 				index ++;
 
 				//transpose
-				Mat img_t;
-				transpose(img(Rect(x-width,y-width,2*width,2*width)), img_t);
+				transpose(img_o, img_o);
 				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
-				imwrite(img_name, img_t);
+				imwrite(img_name, img_o);
+				index ++;
+				transpose(img_l, img_l);
+				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
+				imwrite(img_name, img_l);
+				index ++;
+				transpose(img_s, img_s);
+				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
+				imwrite(img_name, img_s);
 				index ++;
 
 				//rotate 90 degree
-				/*flip(img_t, img_t, 1);
+				flip(img_o, img_o, 1);
 				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
-				imwrite(img_name, img_t);
+				imwrite(img_name, img_o);
+				index ++;
+				flip(img_l, img_l, 1);
+				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
+				imwrite(img_name, img_l);
+				index ++;
+				flip(img_s, img_s, 1);
+				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
+				imwrite(img_name, img_s);
 				index ++;
 
 				//rotate 180 degree
-				transpose(img_t, img_t);
-				flip(img_t, img_t, 0);
+				transpose(img_o, img_o);
+				flip(img_o, img_o, 0);
 				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
-				imwrite(img_name, img_t);
+				imwrite(img_name, img_o);
+				index ++;
+				transpose(img_l, img_l);
+				flip(img_l, img_l, 0);
+				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
+				imwrite(img_name, img_l);
+				index ++;
+				transpose(img_s, img_s);
+				flip(img_s, img_s, 0);
+				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
+				imwrite(img_name, img_s);
 				index ++;
 
 				//rotate 270 degree
-				transpose(img_t, img_t);
-				flip(img_t, img_t, 0);
+				transpose(img_o, img_o);
+				flip(img_o, img_o, 0);
 				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
-				imwrite(img_name, img_t);
-				index ++;*/
+				imwrite(img_name, img_o);
+				index ++;
+				transpose(img_l, img_l);
+				flip(img_l, img_l, 0);
+				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
+				imwrite(img_name, img_l);
+				index ++;
+				transpose(img_s, img_s);
+				flip(img_s, img_s, 0);
+				sprintf(img_name, "%s%04i_1.png", out_fold.c_str(), index);
+				imwrite(img_name, img_s);
+				index ++;
 			}
 		}
 	}
@@ -353,7 +405,7 @@ void getTrainingSet(string train_fold, string out_fold, float thresh, int width,
 					//cout << string(entry->d_name) << endl;
 					if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "csv")
 						csv_set.push_back(curDir + string("/") + string(entry->d_name));
-					else
+					else if(string(entry->d_name).substr(string(entry->d_name).find_last_of('.') + 1) == "bmp")
 						bmp_set.push_back(curDir + string("/") + string(entry->d_name));
 				}
 			}

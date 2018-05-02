@@ -16,6 +16,8 @@ int main(){
 	string model_address = "E:/45 Thesis/result_icpr/model.txt";
 	string mask_address = "E:/45 Thesis/result_icpr/mask.txt";
 
+	
+
 	bool generate_mask_flag;
 	Mat mask_result = Mat::zeros(1,256,CV_32FC1);
 	float mask_threshold = 0;
@@ -49,6 +51,21 @@ int main(){
 		RF->load(fin_model);
 		fin_model.close();
 
+		ofstream finnnn("E:/testt.txt");
+		RF->save(finnnn);
+		cout << "endl" << endl;
+		cin.get();
+
+		/*cout << "*****************Start to tttt*****************" << endl;
+		Mat ttt = imread("C:/45 Thesis/data_icpr/test_A/A00_00/0036_0126.png",0);
+		integral(ttt, ttt);	
+		float haha = RF->predict(ttt);
+		cout << haha << endl;
+		
+		cout << "***************** tttt*****************" << endl;
+		cin.get();
+		cin.get();*/
+
 		cout << "*****************Start to evaluate the performance*****************" << endl;
 		double start,end;
 		start=clock();
@@ -61,7 +78,7 @@ int main(){
 		double test_t = (end - start) / CLOCKS_PER_SEC ;
 		cout << "*****************Evaluation completed*****************" << endl << endl;
 		
-		cout << "*****************Start to calculate F1 score*****************" << endl;
+		/*cout << "*****************Start to calculate F1 score*****************" << endl;
 		float F1_score = get_F1_score(test_fold);
 		cout << "*****************Calculation completed*****************" << endl << endl;
 		
@@ -76,22 +93,31 @@ int main(){
 		fin.close();
 		
 		delete RF;
-		RF = NULL;
+		RF = NULL;*/
 	}
 
 	//cin.get();
 
 	if(!load_model_flag){
 		cout << "*****************Start to extract sub-image*****************" << endl;
-		float train_thresh = 0.25;
+		float train_thresh = 0.15;
 		float test_thresh = 0.15;
 
 		bool get_train = false;
 		bool get_test = false;
 
+		if(get_train){
+			cout << "Extract train data?" << endl;
+			cin >> get_train;
+		}
+		if(get_test){
+			cout << "Extract test data?" << endl;
+			cin >> get_test;
+		}
+
 		int patch_width = 35;
 		int core_R = 4;
-		int ran_point = 20;
+		int ran_point = 40;
 
 		extractData(train_fold, test_fold, out_fold, train_thresh, test_thresh, get_train, get_test, patch_width, core_R, ran_point);
 		cout << "*****************Extraction completed*****************" << endl << endl;
@@ -136,7 +162,7 @@ int main(){
 
 		double start,end;
 
-		for(int i=1; i<=20; i+=2){
+		for(int i=1; i<=1; i+=2){
 			int window_width = 10;
 
 			//int tree_num = 3;
@@ -144,7 +170,7 @@ int main(){
 			int sample_num = 10000;
 			int maxDepth = 50;
 			//int minLeafSample = 10;
-			int minLeafSample = i;
+			int minLeafSample = 11;
 			float minInfo = 0;
 
 			cout << "*****************Start to train the model*****************" << endl;
@@ -178,18 +204,18 @@ int main(){
 			cout << "*****************Evaluation completed*****************" << endl << endl;
 
 			cout << "*****************Start to calculate F1 score*****************" << endl;
-			float F1_score = get_F1_score(test_fold);
+			//float F1_score = get_F1_score(test_fold);
 			cout << "*****************Calculation completed*****************" << endl << endl;
 
-			ofstream fin("E:/45 Thesis/result_icpr/result.csv",ios::app);
-			if(!fin){
-				cout << "open file error" <<endl; 
-				cin.get();
-				return 0;
-			}
+			//ofstream fin("E:/45 Thesis/result_icpr/result.csv",ios::app);
+			//if(!fin){
+			//	cout << "open file error" <<endl; 
+			//	cin.get();
+			//	return 0;
+			//}
 
-			fin <<",tree num," <<  tree_num << ",sumple num," << sample_num << ",maxDepth," << maxDepth << ",minLeafSample," << minLeafSample << ",minInfo," << minInfo <<",train time," << train_t << ",test time," << test_t <<",window width," << window_width << endl;;
-			fin.close();
+			//fin <<",tree num," <<  tree_num << ",sumple num," << sample_num << ",maxDepth," << maxDepth << ",minLeafSample," << minLeafSample << ",minInfo," << minInfo <<",train time," << train_t << ",test time," << test_t <<",window width," << window_width << endl;;
+			//fin.close();
 
 			delete RF;
 			RF = NULL;
@@ -199,6 +225,10 @@ int main(){
 		labelTrain.clear();
 		vector<int>().swap(labelTrain);
 	}
+
+	float F1_score = get_F1_score(test_fold);
+	cout << "F1 ended" << endl;
+	cin.get();
 
 	cout << "*****************Benchmark completed*****************" << endl;
 	cin.get();
