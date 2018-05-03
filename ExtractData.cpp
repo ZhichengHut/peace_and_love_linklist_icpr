@@ -159,6 +159,20 @@ void saveTrainData(string img_file, string csv_file, string out_fold, float thre
 	Mat img = imread(img_file,1);
 	Mat blue_ratio = preProcess(img, thresh);
 
+	Mat out[3];
+	split(img, out);
+	
+	Mat r = out[2];
+	Mat g = out[1];
+	Mat b = out[0];
+	
+	r.convertTo(r,CV_32FC1);
+	g.convertTo(g,CV_32FC1);
+	b.convertTo(b,CV_32FC1);
+	
+	Mat b_r = 100*b/(1+r+g)*256/(1+r+g+b);
+	b_r.convertTo(b_r,CV_8UC1);
+
 	//int R = 10;
 	vector<Point2i> center = getCenter(blue_ratio, R);
 	int cell_num = center.size();
@@ -206,7 +220,7 @@ void saveTrainData(string img_file, string csv_file, string out_fold, float thre
 		else{
 			char img_name[100];
 			sprintf(img_name, "%s%04i_0.png", out_fold.c_str(), index);
-			imwrite(img_name, img(Rect(x-width,y-width,2*width,2*width)));
+			imwrite(img_name, b_r(Rect(x-width,y-width,2*width,2*width)));
 			index ++;
 		}
 	}
@@ -258,7 +272,7 @@ void saveTrainData(string img_file, string csv_file, string out_fold, float thre
 				int scale = (int)(width*0.1);
 				
 				Mat img_o;
-				img(Rect(x-width,y-width,2*width,2*width)).copyTo(img_o);
+				b_r(Rect(x-width,y-width,2*width,2*width)).copyTo(img_o);
 				Mat img_l;
 				resize(img_o, img_l, Size(2*(width+scale),2*(width+scale)), 0, 0, INTER_LINEAR);
 				img_l = img_l(Rect(scale,scale,2*width,2*width));
@@ -347,6 +361,20 @@ void saveTrainData(string img_file, string out_fold, float thresh, int width, in
 	Mat img = imread(img_file,1);
 	Mat blue_ratio = preProcess(img, thresh);
 
+	Mat out[3];
+	split(img, out);
+	
+	Mat r = out[2];
+	Mat g = out[1];
+	Mat b = out[0];
+	
+	r.convertTo(r,CV_32FC1);
+	g.convertTo(g,CV_32FC1);
+	b.convertTo(b,CV_32FC1);
+	
+	Mat b_r = 100*b/(1+r+g)*256/(1+r+g+b);
+	b_r.convertTo(b_r,CV_8UC1);
+
 	//int R = 10;
 	vector<Point2i> center = getCenter(blue_ratio, R);
 	int cell_num = center.size();
@@ -373,7 +401,7 @@ void saveTrainData(string img_file, string out_fold, float thresh, int width, in
 		
 		char img_name[100];
 		sprintf(img_name, "%s%04i_0.png", out_fold.c_str(), index);
-		imwrite(img_name, img(Rect(x-width,y-width,2*width,2*width)));
+		imwrite(img_name, b_r(Rect(x-width,y-width,2*width,2*width)));
 		index ++;
 	}
 }

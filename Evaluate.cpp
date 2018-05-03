@@ -108,14 +108,28 @@ void get_predict_result(RandomForest *RF, string test_fold, int width, int sampl
 						string cur_img = string(curDir) + "/" + string(entry->d_name);
 						cout << "current img: " << cur_img << endl;
 						
-						Mat imgTest = imread(cur_img,0);
+						//Mat imgTest = imread(cur_img,0);
+						Mat imgTest = imread(cur_img,1);
+						Mat out[3];
+						split(imgTest, out);
+						
+						Mat r = out[2];
+						Mat g = out[1];
+						Mat b = out[0];
+						
+						r.convertTo(r,CV_32FC1);
+						g.convertTo(g,CV_32FC1);
+						b.convertTo(b,CV_32FC1);
+						
+						Mat b_r = 100*b/(1+r+g)*256/(1+r+g+b);
+						b_r.convertTo(b_r,CV_8UC1);
 						
 						vector<float> result;
 						Mat test_tmp;
 						
 						for(int x=0; x<imgTest.cols-2*width; x+=sample_interval){
 							for(int y=0; y<imgTest.rows-2*width; y+=sample_interval){
-								integral(imgTest(Rect(x,y,2*width,2*width)), test_tmp);		
+								integral(b_r(Rect(x,y,2*width,2*width)), test_tmp);		
 								result.push_back(RF->predict(test_tmp));
 							}
 						}
